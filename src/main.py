@@ -1,4 +1,5 @@
 import logging
+from logging.handlers import RotatingFileHandler
 import schedule
 import time
 
@@ -6,10 +7,15 @@ from message_queue import MessageQueueProcessor
 from lib import OllamaClient, GfApiClient, GoogleSheetHandler
 
 logger = logging.getLogger(__name__)
+
+rotating_file_handler = RotatingFileHandler(
+    "logs/main.log", maxBytes=5 * 1024 * 1024, backupCount=5, encoding="utf-8"
+)
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.FileHandler("logs/main.log"), logging.StreamHandler()],
+    handlers=[rotating_file_handler, logging.StreamHandler()],
 )
 
 

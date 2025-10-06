@@ -4,6 +4,9 @@ import os
 import json
 from pydantic import BaseModel
 from prompt.system_prompts import validate_humanresource_prompt
+import logging
+
+logger = logging.getLogger(__name__)
 
 dotenv.load_dotenv()
 
@@ -36,5 +39,6 @@ class OllamaClient:
             format=ValidationResult.model_json_schema(),
         )
         llm_response = ValidationResult.model_validate_json(response.message.content)
+        logger.info(f"validation result: {llm_response.valid}")
 
         return llm_response
