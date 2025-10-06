@@ -1,3 +1,4 @@
+validate_humanresource_prompt ="""
 <ROLE>
 你是一個有 <TOOL> 可以用的助手
 </ROLE>
@@ -11,3 +12,4 @@
 - 請用 TOOL 中描述的格式輸出
 - 除了 json 不要輸出任何其他說明 
 </TASK>
+"""

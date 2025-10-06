@@ -19,17 +19,6 @@ logger = logging.getLogger(__name__)
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 
-class GoogleSheetConfig(BaseModel):
-    credentials_path: Optional[str] = None
-    spreadsheet_id: str
-
-
-google_config = GoogleSheetConfig(
-    credentials_path=os.getenv("GOOGLE_CREDENTIALS_PATH"),
-    spreadsheet_id=os.getenv("GOOGLE_SHEET_ID"),
-)
-
-
 class RecordTargetFields(HumanResource, ValidationResult):
     """記錄的 schema"""
 
@@ -41,10 +30,11 @@ class GoogleSheetHandler:
 
     _service = None
     _credentials = None
+    credentials_path = "secret/cred.json"
 
-    def __init__(self, config: GoogleSheetConfig = google_config):
-        self.config = config
+    def __init__(self):
         self._ensure_service()
+        self.spreadsheet_id = os.getenv("GOOGLE_SHEET_ID")
 
     @classmethod
     def _ensure_service(cls):
@@ -57,14 +47,10 @@ class GoogleSheetHandler:
         """使用 JSON 憑證檔案進行認證（只執行一次）"""
         try:
             if cls._credentials is None:
-                config = GoogleSheetConfig(
-                    credentials_path=os.getenv("GOOGLE_CREDENTIALS_PATH"),
-                    spreadsheet_id=os.getenv("GOOGLE_SHEET_ID"),
-                )
 
-                if config.credentials_path:
+                if cls.credentials_path:
                     cls._credentials = ServiceAccountCredentials.from_service_account_file(
-                        config.credentials_path, scopes=SCOPES
+                        cls.credentials_path, scopes=SCOPES
                     )
                 else:
                     raise ValueError("必須提供 credentials_path")
@@ -99,7 +85,7 @@ class GoogleSheetHandler:
                 self.service.spreadsheets()
                 .values()
                 .append(
-                    spreadsheetId=self.config.spreadsheet_id,
+                    spreadsheetId=self.spreadsheet_id,
                     range=sheet_name,
                     valueInputOption="RAW",
                     insertDataOption="INSERT_ROWS",
@@ -148,11 +134,7 @@ class GoogleSheetHandler:
 
 if __name__ == "__main__":
     try:
-        google_sheet_config = GoogleSheetConfig(
-            credentials_path=os.getenv("GOOGLE_CREDENTIALS_PATH"),
-            spreadsheet_id=os.getenv("GOOGLE_SHEET_ID"),
-        )
-        sheet_handler = GoogleSheetHandler(google_sheet_config)
+        sheet_handler = GoogleSheetHandler()
 
         new_data = [["測試", "資料", "範例"]]
         sheet_handler.append_sheet("test!A1:C1", new_data)
