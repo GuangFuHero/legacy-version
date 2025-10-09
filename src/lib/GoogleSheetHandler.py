@@ -1,15 +1,17 @@
-import os
-import dotenv
-from datetime import datetime
+import enum
 import logging
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
+import os
+import socket
+import time
+from datetime import datetime
+from typing import Any, Dict, List
 
+import dotenv
 from google.oauth2.service_account import Credentials as ServiceAccountCredentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from .GfApiClient import HumanResource
+from .GfApiClient import HumanResource, Supplies
 from .OllamaClient import ValidationResult
 
 dotenv.load_dotenv()
@@ -19,15 +21,26 @@ logger = logging.getLogger(__name__)
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 
-class RecordTargetFields(HumanResource, ValidationResult):
-    """記錄的 schema"""
+class SheetName(enum.Enum):
+    valid_human_resource = "valid_human_resource"
+    invalid_human_resource = "invalid_human_resource"
+    valid_supplies = "valid_supplies"
+    invalid_supplies = "invalid_supplies"
 
+
+class HumanResourceRecord(HumanResource, ValidationResult):
+    """人力資源記錄的 schema"""
+    validated_at: datetime
+
+
+class SuppliesRecord(Supplies, ValidationResult):
+    """物資記錄的 schema - 用於 Google Sheet"""
+    supplies: str
     validated_at: datetime
 
 
 class GoogleSheetHandler:
     """Google Sheets 處理器，支援讀取、寫入、更新和刪除操作"""
-
     _service = None
     _credentials = None
     credentials_path = "secret/cred.json"
@@ -47,7 +60,6 @@ class GoogleSheetHandler:
         """使用 JSON 憑證檔案進行認證（只執行一次）"""
         try:
             if cls._credentials is None:
-
                 if cls.credentials_path:
                     cls._credentials = ServiceAccountCredentials.from_service_account_file(
                         cls.credentials_path, scopes=SCOPES
@@ -55,7 +67,11 @@ class GoogleSheetHandler:
                 else:
                     raise ValueError("必須提供 credentials_path")
 
-            cls._service = build("sheets", "v4", credentials=cls._credentials)
+            cls._service = build(
+                "sheets", 
+                "v4", 
+                credentials=cls._credentials
+            )
             logger.info("Google Sheets API 使用 JSON 憑證認證成功")
 
         except Exception as e:
@@ -67,77 +83,108 @@ class GoogleSheetHandler:
         """取得共享的 service 實例"""
         return self._service
 
-    def append_sheet(self, sheet_name: str, values: List[List[str]]) -> Dict[str, Any]:
+    def append_sheet(self, sheet_name: SheetName, values: List[List[str]], max_retries: int = 3) -> Dict[str, Any]:
         """
-        在 Google Sheets 末尾追加資料
-
+        在 Google Sheets 末尾追加資料（帶重試機制）
+        
         Args:
-            sheet_name: 目標分頁，例如 'Sheet1'
+            sheet_name: 目標分頁
             values: 要追加的資料（二維陣列）
-
+            max_retries: 最大重試次數
+        
         Returns:
             API 回應
         """
-        try:
-            body = {"values": values}
+        for attempt in range(max_retries):
+            try:
+                body = {"values": values}
 
-            result = (
-                self.service.spreadsheets()
-                .values()
-                .append(
-                    spreadsheetId=self.spreadsheet_id,
-                    range=sheet_name,
-                    valueInputOption="RAW",
-                    insertDataOption="INSERT_ROWS",
-                    body=body,
+                result = (
+                    self.service.spreadsheets()
+                    .values()
+                    .append(
+                        spreadsheetId=self.spreadsheet_id,
+                        range=f"{sheet_name.value}!A:A",
+                        valueInputOption="RAW",
+                        insertDataOption="INSERT_ROWS",
+                        body=body,
+                    )
+                    .execute()
                 )
-                .execute()
-            )
 
-            logger.info(f"成功追加 {len(values)} 行資料")
-            return result
+                logger.info(f"成功追加 {len(values)} 行資料")
+                return result
 
-        except HttpError as error:
-            logger.error(f"追加 Google Sheets 資料時發生錯誤: {error}")
-            raise
+            except (TimeoutError, socket.timeout, OSError) as error:
+                if attempt < max_retries - 1:
+                    wait_time = 2 ** attempt
+                    logger.warning(f"請求超時，{wait_time}秒後重試 (嘗試 {attempt + 1}/{max_retries})")
+                    time.sleep(wait_time)
+                else:
+                    logger.error(f"追加資料失敗，已達最大重試次數: {error}")
+                    raise
+                    
+            except HttpError as error:
+                logger.error(f"追加 Google Sheets 資料時發生錯誤: {error}")
+                raise
 
-    def append_record(self, record: dict, validation_result, sheet_name: str) -> None:
-        """寫入一筆資料"""
+    def append_record(self, record: HumanResource | Supplies, validation_result, sheet_name: str) -> None:
+        """寫入一筆資料，根據 sheet_name 判斷資料類型"""
         try:
-            record = RecordTargetFields(
-                id=record.get("id", ""),
-                org=record.get("org", ""),
-                address=record.get("address", ""),
-                role_name=record.get("role_name", ""),
-                assignment_notes=record.get("assignment_notes", ""),
-                valid=validation_result.valid,
-                reason=validation_result.reason,
-                validated_at=datetime.now(),
-            )
-
-            row_data = [
-                (
-                    getattr(record, field).isoformat()
-                    if isinstance(getattr(record, field), datetime)
-                    else getattr(record, field)
+            if "human_resource" in sheet_name:
+                record_obj = HumanResourceRecord(
+                    id=record.id,
+                    org=record.org,
+                    address=record.address,
+                    role_name=record.role_name,
+                    assignment_notes=record.assignment_notes,
+                    valid=validation_result.valid,
+                    reason=validation_result.reason,
+                    validated_at=datetime.now(),
                 )
-                for field in RecordTargetFields.__fields__.keys()
-            ]
+                fields = [
+                    "id", "org", "address", "role_name", "assignment_notes",
+                    "valid", "reason", "validated_at"
+                ]
+            elif "supplies" in sheet_name:
+                supplies_list = record.supplies
+                
+                supplies_items = []
+                for item in supplies_list:
+                    supply_info = f"{item.name} ({item.unit})"
+                    supplies_items.append(supply_info)
+                
+                supplies_str = " / ".join(supplies_items)
+                logger.info(f"轉換後的 supplies 字串: {supplies_str}")
 
-            self.append_sheet(sheet_name, [row_data])
-            logger.info(f"已寫入資料: {record.id}")
+                record_obj = SuppliesRecord(
+                    id=record.id,
+                    name=record.name,
+                    address=record.address,
+                    supplies=supplies_str,
+                    valid=validation_result.valid,
+                    reason=validation_result.reason,
+                    validated_at=datetime.now(),
+                )
+                fields = [
+                    "id", "name", "address", "supplies",
+                    "valid", "reason", "validated_at"
+                ]
+            else:
+                raise ValueError(f"Unknown sheet_name: {sheet_name}")
+
+            row_data = []
+            for field in fields:
+                value = getattr(record_obj, field)
+                if isinstance(value, datetime):
+                    formatted_value = value.isoformat()
+                else:
+                    formatted_value = str(value) if value is not None else ""
+                row_data.append(formatted_value)
+
+            self.append_sheet(SheetName[sheet_name], [row_data])
+            logger.info(f"已寫入資料到 {sheet_name}: {record_obj.id}")
 
         except Exception as e:
             logger.error(f"寫入資料時發生錯誤: {e}")
             raise
-
-
-if __name__ == "__main__":
-    try:
-        sheet_handler = GoogleSheetHandler()
-
-        new_data = [["測試", "資料", "範例"]]
-        sheet_handler.append_sheet("test!A1:C1", new_data)
-
-    except Exception as e:
-        logger.error(f"發生錯誤: {e}")

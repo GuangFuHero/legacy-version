@@ -1,4 +1,4 @@
-from .GfApiClient import GfApiClient, HumanResource
+from .GfApiClient import GfApiClient, HumanResource, Supplies
 from .GoogleSheetHandler import GoogleSheetHandler
 from .OllamaClient import OllamaClient, ValidationResult
 
@@ -8,4 +8,5 @@ __all__ = [
     "OllamaClient",
     "ValidationResult",
     "HumanResource",
+    "Supplies",
 ]

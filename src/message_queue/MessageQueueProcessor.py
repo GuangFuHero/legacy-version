@@ -1,80 +1,36 @@
 import json
 import logging
-import time
 import os
+import time
+from typing import Union
+
 import redis
 
-from .ProcessedRecordTracker import ProcessedRecordTracker
-
-from lib import GfApiClient, HumanResource, GoogleSheetHandler, OllamaClient
+from lib import HumanResource, Supplies
+from wokers import RecordProcessor
 
 logger = logging.getLogger(__name__)
 
 
 class MessageQueueProcessor:
-    """基於 Redis Message Queue 的處理器"""
+    """基於 Redis Message Queue 的處理器 - 純 Queue 管理"""
 
     def __init__(
         self,
-        validator: OllamaClient,
-        gf_api_client: GfApiClient,
-        google_sheet_handler: GoogleSheetHandler,
+        record_processor: RecordProcessor,
         redis_url: str = os.getenv("REDIS_URL"),
-        queue_name: str = "validation_queue",
+        queue_name: str = "",
     ):
-        self.validator = validator
-        self.gf_api_client = gf_api_client
-        self.google_sheet_handler = google_sheet_handler
+        """
+        Args:
+            record_processor: 記錄處理器
+            redis_url: Redis 連線 URL
+            queue_name: Queue 名稱
+        """
+        self.record_processor = record_processor
         self.redis = redis.from_url(redis_url, decode_responses=False)
         self.queue_name = queue_name
-        self.tracker = ProcessedRecordTracker(self.redis)
         self.is_running = False
-
-    def fetch_new_records(self, limit: int = 0, offset: int = 0) -> list[HumanResource]:
-        """抓取最新的幾筆資料，過濾已處理和已在 queue 中的記錄"""
-        try:
-            response = self.gf_api_client.get_human_resource(limit=limit, offset=offset)
-
-            new_records: list[HumanResource] = []
-            skipped_count = 0
-
-            for record in response:
-                record_id = record.id
-
-                if self.tracker.is_processed(record_id):
-                    skipped_count += 1
-                    logger.debug(f"記錄 {record_id} 已處理過，跳過")
-                    continue
-
-                if self._is_record_in_queue(record_id):
-                    skipped_count += 1
-                    logger.debug(f"記錄 {record_id} 已在 queue 中，跳過")
-                    continue
-
-                new_records.append(record)
-
-            logger.info(
-                f"抓取到 {len(new_records)} 筆新資料（共檢查 {len(response)} 筆，跳過 {skipped_count} 筆）"
-            )
-            return new_records
-
-        except Exception as e:
-            logger.error(f"抓取資料錯誤: {e}")
-            return []
-
-    def upload_record_to_google_sheet(
-        self, record: dict, validation_result, sheet_name: str
-    ) -> None:
-        """上傳記錄到 Google Sheet"""
-        try:
-            record_id = record.get("id", "unknown")
-            self.google_sheet_handler.append_record(record, validation_result, sheet_name)
-            self.tracker.mark_as_processed(record_id)
-
-            logger.info(f"{sheet_name} {record_id} 處理完成")
-
-        except Exception as e:
-            logger.error(f"處理有效記錄時發生錯誤: {e}", exc_info=True)
 
     def _is_record_in_queue(self, record_id: str) -> bool:
         """檢查記錄是否已在 Redis queue 中"""
@@ -94,7 +50,7 @@ class MessageQueueProcessor:
             logger.error(f"檢查 queue 中的記錄時發生錯誤: {e}")
             return False
 
-    def add_to_queue(self, records: list[HumanResource]):
+    def add_to_queue(self, records: list[Union[HumanResource, Supplies]]):
         """將資料加入 Redis message queue，避免重複"""
         added_count = 0
         skipped_count = 0
@@ -108,7 +64,7 @@ class MessageQueueProcessor:
                     logger.debug(f"記錄 {record_id} 已在 queue 中，跳過加入")
                     continue
 
-                record_dict = record.dict() if hasattr(record, "dict") else record
+                record_dict = record.model_dump() if hasattr(record, "dict") else record
                 record_json = json.dumps(record_dict, ensure_ascii=False)
                 self.redis.lpush(self.queue_name, record_json)
                 added_count += 1
@@ -129,33 +85,25 @@ class MessageQueueProcessor:
 
                 if result:
                     _, record_json = result
-                    record = json.loads(record_json)
-                    record_id = record.get("id", "unknown")
+                    record_dict = json.loads(record_json)
+                    
+                    if "human_resource" in self.queue_name:
+                        record = HumanResource(**record_dict)
+                    elif "supplies" in self.queue_name:
+                        record = Supplies(**record_dict)
+                    else:
+                        logger.error(f"未知的 queue_name: {self.queue_name}")
+                        continue
+                    
+                    record_id = record.id
 
-                    logger.info(f"開始處理記錄: {record_id}")
+                    logger.info(f"從 queue 取出記錄: {record_id}")
 
-                    try:
-                        validation_result = self.validator.get_validation_result(record)
+                    success = self.record_processor.process_record(record)
 
-                        if validation_result:
-                            sheet_name = "valid" if validation_result.valid else "invalid"
-                            self.upload_record_to_google_sheet(
-                                record, validation_result, sheet_name
-                            )
-                            if not validation_result.valid:
-                                self.gf_api_client.submit_spam_judgment(
-                                    record_id, "human_resource", record, 
-                                    validation_result.valid, validation_result.reason
-                                )
-                        else:
-                            logger.error(f"記錄 {record_id} 驗證失敗")
-
-                    except Exception as process_error:
-                        logger.error(
-                            f"處理記錄 {record_id} 時發生錯誤: {process_error}", exc_info=True
-                        )
+                    if not success:
                         self.redis.rpush(self.queue_name, record_json)
-                        logger.info(f"記錄 {record_id} 已放回 queue 等待重試")
+                        logger.info(f"記錄 {record_id} 處理失敗，已放回 queue 等待重試")
                         time.sleep(1)
 
             except json.JSONDecodeError as e:
@@ -168,13 +116,7 @@ class MessageQueueProcessor:
     def clear_queue(self):
         """清空 Redis queue"""
         self.redis.delete(self.queue_name)
-
-    def process_record(self, record: dict):
-        """處理一筆記錄"""
-        validation_result = self.validator.get_validation_result(record)
-        if validation_result:
-            sheet_name = "valid" if validation_result.valid else "invalid"
-            self.upload_record_to_google_sheet(record, validation_result, sheet_name)
+        logger.info(f"已清空 queue: {self.queue_name}")
 
     def start(self):
         """啟動處理器"""
@@ -183,13 +125,13 @@ class MessageQueueProcessor:
             return
 
         self.is_running = True
-        logger.info("Redis Message Queue 處理器已啟動")
+        logger.info(f"Redis Message Queue 處理器已啟動: {self.queue_name}")
 
     def stop(self):
         """停止處理器"""
-        logger.info("正在停止 Redis Message Queue 處理器...")
+        logger.info(f"正在停止 Redis Message Queue 處理器: {self.queue_name}")
         self.is_running = False
-        logger.info("Redis Message Queue 處理器已停止")
+        logger.info(f"Redis Message Queue 處理器已停止: {self.queue_name}")
 
     def get_queue_size(self) -> int:
         """取得 Redis queue 大小"""
@@ -198,23 +140,8 @@ class MessageQueueProcessor:
     def get_stats(self) -> dict:
         """取得統計資訊"""
         return {
+            "queue_name": self.queue_name,
             "queue_size": self.get_queue_size(),
-            "processed_count": self.tracker.get_processed_count(),
-            "last_processed_id": self.tracker.get_last_processed_id(),
+            "processed_count": self.record_processor.tracker.get_processed_count(),
+            "last_processed_id": self.record_processor.tracker.get_last_processed_id(),
         }
-
-    def scheduled_fetch(self, limit: int = 10, offset: int = 0):
-        """定時抓取任務"""
-        logger.info(f"[定時任務] 開始抓取最新 {limit} 筆資料...")
-        new_records = self.fetch_new_records(limit=limit, offset=offset)
-
-        if new_records:
-            self.add_to_queue(new_records)
-            logger.info(f"[定時任務] 已將 {len(new_records)} 筆資料加入 Redis queue")
-        else:
-            logger.info("[定時任務] 沒有新資料")
-
-        stats = self.get_stats()
-        logger.info(
-            f"[統計] Queue 大小: {stats['queue_size']}, 已處理: {stats['processed_count']}, "
-        )

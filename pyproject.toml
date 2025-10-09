@@ -16,4 +16,34 @@ dependencies = [
     "google-api-python-client>=2.108.0",
     "redis>=6.4.0",
     "schedule>=1.2.2",
+    "httplib2>=0.31.0",
 ]
+
+[dependency-groups]
+dev = [
+    "black>=24.0.0",
+    "flake8>=7.0.0",
+    "isort>=5.13.0",
+    "autopep8>=2.0.0",
+    "autoflake>=2.0.0",
+]
+
+[tool.black]
+line-length = 120
+target-version = ['py313']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # 預設排除的目錄
+  \.git
+  | \.venv
+  | __pycache__
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 120
+known_first_party = ["lib", "message_queue", "prompt"]

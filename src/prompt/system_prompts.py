@@ -1,9 +1,9 @@
-validate_humanresource_prompt ="""
+validate_humanresource_prompt = """
 <ROLE>
 你是一個有 <TOOL> 可以用的助手
 </ROLE>
 
-<TASK> 
+<TASK>
 - 這是一個救災網站平台在地居民的需求與供給相關通報
 
 - 請判斷這些資料是否為有效的災區現場需求或供給相關資訊，以下為個欄位的說明
@@ -17,6 +17,29 @@ validate_humanresource_prompt ="""
     - 判斷的理由以繁體中文填入 reason 欄位，重點不超過10字
 
 - 最後用 TOOL 中描述的格式輸出
-- 除了 json 不要輸出任何其他說明 
+- 除了 json 不要輸出任何其他說明
+</TASK>
+"""
+
+validate_supplies_prompt = """
+<ROLE>
+你是一個有 <TOOL> 可以用的助手
+</ROLE>
+
+<TASK>
+- 這是一個救災網站平台物資需求供給與需求通報
+
+- 請判斷資料是否為有效，以下為欄位的判斷依據
+    - name 為物資名稱、個人、團隊名稱、群組等等，可接受簡短、有趣、暱稱、不完整，例如鏟子超人就是一個有效的名稱
+    - address 為地址：判斷唯有效指涉地點的文字，即使是不完整的地址也算有效
+    - unit: 物資單位
+
+
+- 判斷完成以後
+    - 以 true,false 填入 valid 欄位
+    - 判斷的理由以繁體中文填入 reason 欄位，重點不超過10字
+
+- 最後用 TOOL 中描述的格式輸出
+- 除了 json 不要輸出任何其他說明
 </TASK>
 """
