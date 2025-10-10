@@ -10,7 +10,7 @@
 - 🌐 整合外部 API 進行訊息管理
 - 📊 結構化的驗證結果輸出
 - 🚀 使用 Redis Message Queue 進行非同步處理
-- 📝 自動上傳驗證結果到 Google Sheets
+- 📝 驗證結果分別傳送到 google sheet、guanfu go be 以及私人 discord server
 - 🔄 定時排程抓取和處理新資料
 
 ## 系統架構
