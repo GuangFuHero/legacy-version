@@ -30,6 +30,7 @@
 - **GfApiClient**: 光復救災平台 API 客戶端
 - **OllamaClient**: Ollama LLM 驗證客戶端
 - **GoogleSheetHandler**: Google Sheets 整合
+```
 
 ## 系統需求
 
@@ -80,7 +81,6 @@ OLLAMA_MODEL=gemma3:1b
 
 # Google Sheets 設定
 GOOGLE_SHEET_ID=your-google-sheet-id
-GOOGLE_CREDENTIALS_BASE64=your-base64-encoded-credentials
 
 # 抓取設定
 FETCH_LIMIT=50
@@ -89,16 +89,21 @@ OFFSET=0
 
 ### 3. 準備 Google Credentials
 
-```bash
-# 將 Google Cloud 服務帳戶憑證轉換為 base64
-base64 -w 0 path/to/your/credentials.json > secret/cred.txt
+系統需要 Google Cloud 服務帳戶憑證來存取 Google Sheets。在建構 Docker 映像前，需先準備憑證檔案。
 
-# 或直接設定環境變數
-export GOOGLE_CREDENTIALS_BASE64=$(base64 -w 0 path/to/your/credentials.json)
+```bash
+# 1. 創建 secret 目錄
+mkdir -p secret
+
+# 2. 將 Google Cloud 服務帳戶憑證轉換為 base64 並儲存
+base64 -w 0 path/to/your/credentials.json > secret/cred.txt
 ```
 
-
-## 使用方法
+**Docker 建構過程說明：**
+- Dockerfile 會在建構時自動執行以下步驟：
+  1. 複製 `secret/cred.txt` 到容器中
+  2. 解碼 base64 內容並轉換為 `secret/cred.json`
+  3. 刪除臨時的 `cred.txt` 檔案（保護憑證安全）
 
 ### 啟動服務
 
