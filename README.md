@@ -199,13 +199,8 @@ uv run python src/main.py
 
 可以透過修改 `.env` 中的 `OLLAMA_MODEL` 來使用不同的 LLM 模型：
 
-```bash
-# 下載其他模型
-ollama pull llama2
-ollama pull mistral
-
 # 在 .env 中設定
-OLLAMA_MODEL=llama2
+OLLAMA_MODEL=gemma3:12b
 ```
 
 ### 查看 Redis 資料

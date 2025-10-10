@@ -51,9 +51,9 @@ class Scheduler:
             logger.info(f"[定時任務 - {self.resource_type}] 首次執行，開始載入所有記錄...")
 
             if self.resource_type == "human_resource":
-                get_method = self.gf_api_client.get_all_human_resources
+                get_method = partial(self.gf_api_client.get_all_human_resources, status="active")
             else:
-                get_method = self.gf_api_client.get_all_supplies
+                get_method = partial(self.gf_api_client.get_all_supplies, embed="all")
 
             new_records = self.fetcher.fetch_all_records(get_method)
 
@@ -62,17 +62,18 @@ class Scheduler:
                 logger.info(f"[定時任務 - {self.resource_type}] 已將 {len(new_records)} 筆資料加入 Redis queue")
                 self.mark_all_records_loaded()
             else:
-                logger.info(f"[定時任務 - {self.resource_type}] 沒有新資料，標記已載入")
-                self.mark_all_records_loaded()
+                logger.warning(
+                    f"[定時任務 - {self.resource_type}] 沒有載入到任何新資料（可能全被過濾或 API 異常），保持未完成狀態以便重試"
+                )
         else:
             logger.info(f"[定時任務 - {self.resource_type}] 開始抓取最新 {limit} 筆資料...")
 
             if self.resource_type == "human_resource":
-                get_method = self.gf_api_client.get_human_resource
+                get_method = partial(self.gf_api_client.get_human_resource, limit=limit, offset=offset, status="active")
             elif self.resource_type == "supplies":
-                get_method = partial(self.gf_api_client.get_supplies, embed="all")
+                get_method = partial(self.gf_api_client.get_supplies, limit=limit, offset=offset, embed="all")
 
-            new_records = self.fetcher.fetch_new_records(get_method, limit=limit, offset=offset)
+            new_records = self.fetcher.fetch_new_records(get_method)
 
             if new_records:
                 self.add_to_queue(new_records)

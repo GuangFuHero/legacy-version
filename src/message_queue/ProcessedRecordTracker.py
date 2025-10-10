@@ -15,6 +15,7 @@ class ProcessedRecordTracker:
         self.last_processed_key = "last_processed_id"
         self.valid_records_key = "valid_records"
         self.invalid_records_key = "invalid_records"
+        self.retry_count_key_prefix = "retry_count:"  # 記錄重試次數
 
     def is_processed(self, record_id: str) -> bool:
         """檢查是否已處理"""
@@ -50,3 +51,22 @@ class ProcessedRecordTracker:
     def get_invalid_count(self) -> int:
         """取得無效記錄數量"""
         return self.redis.scard(self.invalid_records_key)
+
+    def get_retry_count(self, record_id: str) -> int:
+        """取得記錄的重試次數"""
+        key = f"{self.retry_count_key_prefix}{record_id}"
+        count = self.redis.get(key)
+        return int(count) if count else 0
+
+    def increment_retry_count(self, record_id: str) -> int:
+        """增加記錄的重試次數，回傳新的次數"""
+        key = f"{self.retry_count_key_prefix}{record_id}"
+        new_count = self.redis.incr(key)
+        # 設定過期時間 7 天，避免永久佔用記憶體
+        self.redis.expire(key, 7 * 24 * 60 * 60)
+        return new_count
+
+    def clear_retry_count(self, record_id: str):
+        """清除記錄的重試次數"""
+        key = f"{self.retry_count_key_prefix}{record_id}"
+        self.redis.delete(key)

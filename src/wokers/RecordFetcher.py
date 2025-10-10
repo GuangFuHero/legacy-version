@@ -49,7 +49,8 @@ class RecordFetcher:
     def _get_processed_ids(self) -> set:
         """取得所有已處理記錄的 ID"""
         try:
-            return set(self.tracker.redis.smembers(self.tracker.processed_set_key))
+            raw_ids = self.tracker.redis.smembers(self.tracker.processed_set_key)
+            return {id.decode("utf-8") if isinstance(id, bytes) else id for id in raw_ids}
         except Exception as e:
             logger.error(f"取得已處理記錄 ID 時發生錯誤: {e}")
             return set()
@@ -57,6 +58,8 @@ class RecordFetcher:
     def _get_queue_ids(self) -> set:
         """取得所有在 queue 中的記錄 ID"""
         try:
+            import json
+
             queue_ids = set()
 
             queue_processor = self.queue_checker.__self__
@@ -64,7 +67,8 @@ class RecordFetcher:
 
             for item in queue_items:
                 try:
-                    import json
+                    if isinstance(item, bytes):
+                        item = item.decode("utf-8")
 
                     record = json.loads(item)
                     record_id = record.get("id")
@@ -95,12 +99,10 @@ class RecordFetcher:
             logger.error(f"抓取所有資料錯誤: {e}")
             return []
 
-    def fetch_new_records(
-        self, get_method: callable, limit: int = 0, offset: int = 0
-    ) -> list[HumanResource] | list[Supplies]:
+    def fetch_new_records(self, get_method: callable) -> list[HumanResource] | list[Supplies]:
         """抓取最新的幾筆資料，過濾已處理和已在 queue 中的記錄"""
         try:
-            response = get_method(limit=limit, offset=offset)
+            response = get_method()
 
             new_records, skipped_count = self._filter_records(response)
 

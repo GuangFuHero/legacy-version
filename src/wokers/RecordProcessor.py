@@ -56,15 +56,15 @@ class RecordProcessor:
                 logger.error(f"記錄 {record_id} 驗證失敗")
                 return False
 
-            validity = "valid" if validation_result.valid else "invalid"
-            sheet_name = f"{validity}_{self.resource_type}"
+            if validation_result.valid:
+                sheet_name = f"valid_{self.resource_type}"
+            elif not validation_result.valid:
+                sheet_name = f"invalid_{self.resource_type}"
+                self.submit_spam_judgment(record, validation_result)
 
             logger.info(f"validation_result: {validation_result}")
 
             self.upload_result(record, validation_result, sheet_name)
-
-            if not validation_result.valid:
-                self.submit_spam_judgment(record, validation_result)
 
             return True
 
@@ -77,20 +77,21 @@ class RecordProcessor:
         self.gf_api_client.submit_spam_judgment(
             record.id,
             self.resource_type,
-            record,
+            record.model_dump(),
             validation_result.valid,
             validation_result.reason,
         )
 
     def upload_result(self, record: HumanResource | Supplies, validation_result, sheet_name: str) -> None:
         """上傳記錄到 Google Sheet 並標記為已處理"""
+        record_id = record.id
+
         try:
-            record_id = record.id
             self.google_sheet_handler.append_record(record, validation_result, sheet_name)
+            logger.info(f"{sheet_name} {record_id} 上傳完成")
+
             self.tracker.mark_as_processed(record_id)
-
-            logger.info(f"{sheet_name} {record_id} 處理完成")
-
+            logger.info(f"記錄 {record_id} 已標記為已處理")
         except Exception as e:
-            logger.error(f"上傳記錄時發生錯誤: {e}", exc_info=True)
+            logger.error(f"上傳記錄 {record_id} 時發生錯誤: {e}", exc_info=True)
             raise

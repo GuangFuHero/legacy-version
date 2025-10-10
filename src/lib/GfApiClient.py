@@ -108,7 +108,6 @@ class GfApiClient:
         endpoint: str,
         model_class: type[BaseModel],
         batch_size: int = 100,
-        use_auth: bool = False,
         **kwargs,
     ) -> list[BaseModel]:
         """取得所有資源（分頁處理）
@@ -157,17 +156,17 @@ class GfApiClient:
         logger.info(f"Total {endpoint} fetched: {len(all_resources)}")
         return all_resources
 
-    def get_all_human_resources(self) -> list[HumanResource]:
+    def get_all_human_resources(self, **kwargs) -> list[HumanResource]:
         """取得所有人力資源"""
-        return self.get_all_resources("human_resources", HumanResource, use_auth=False)
+        return self.get_all_resources("human_resources", HumanResource, **kwargs)
 
-    def get_all_supplies(self) -> list[Supplies]:
+    def get_all_supplies(self, **kwargs) -> list[Supplies]:
         """取得所有物資"""
-        return self.get_all_resources("supplies", Supplies, use_auth=False, embed="all")
+        return self.get_all_resources("supplies", Supplies, **kwargs)
 
-    def get_human_resource(self, limit: int, offset: int) -> list[HumanResource]:
+    def get_human_resource(self, limit: int, offset: int, **kwargs) -> list[HumanResource]:
         """取得最新幾筆人力資源"""
-        return self.get_resources("human_resources", HumanResource, limit, offset, use_auth=False)
+        return self.get_resources("human_resources", HumanResource, limit, offset, **kwargs)
 
     def get_supplies(self, limit: int, offset: int, **kwargs) -> list[Supplies]:
         """取得物資資料"""
@@ -194,7 +193,7 @@ class GfApiClient:
 
 if __name__ == "__main__":
     gf_api_client = GfApiClient()
-    human_resources = gf_api_client.get_human_resource(limit=10, offset=0)
+    human_resources = gf_api_client.get_human_resource(limit=100, offset=0, status="active")
     supplies = gf_api_client.get_supplies(limit=10, offset=0, embed="all")
-    print(human_resources)
-    print(supplies)
+    print(len(human_resources))
+    print(len(supplies))
