@@ -1,0 +1,126 @@
+@import 'tailwindcss';
+
+:root {
+  color-scheme: light;
+  --primary: #f37c0e;
+  --primary-point: #feca5f;
+  --light-primary: #f9e6c0;
+  --tertiary: #ffeeba;
+  --secondary: #179bc6;
+  --secondary-hover: #1488ad;
+  --secondary-light: #e9fffd;
+  --background: #ffffff;
+  --light-gray-background: #f9f8f5;
+  --gray-background: #f1f1f1;
+  --warning-background: #fef2e7;
+  --foreground: #171717;
+  --text-black: #1e1e1e;
+  --gray: #434343;
+  --gray-2: #838383;
+  --gray-3: #e6e6e6;
+  --gray-4: #f4f4f5;
+  --black-overlay: #00000033;
+  --black: #3a3937;
+  --red: #d34746;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  /* TODO: 待確認，會影響全域 */
+  /* font-size: 20px; */
+}
+
+/* iOS Safari viewport height fix */
+@supports (height: 100dvh) {
+  :root {
+    --viewport-height: 100dvh;
+  }
+}
+
+@supports not (height: 100dvh) {
+  :root {
+    --viewport-height: 100vh;
+  }
+}
+
+/* Utility classes for dynamic viewport heights */
+.max-h-screen-minus-header {
+  max-height: calc(var(--viewport-height, 100vh) - 65px);
+}
+
+.max-h-screen-minus-header-footer {
+  max-height: calc(var(--viewport-height, 100vh) - 145px);
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: inline-block;
+  animation: marquee 20s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Toast2 淡入淡出 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+.animate-fade-out {
+  animation: fade-out 0.3s ease-in forwards;
+}
