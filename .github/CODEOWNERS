@@ -5,7 +5,6 @@
 # ---------- FRONTEND ----------
 /frontend/guangfu-hero-web/        @GuangFuHero/frontend
 /frontend/hualien-bees/            @GuangFuHero/frontend
-/frontend/volunteers-archived/     @GuangFuHero/frontend
 
 # ---------- BACKEND ----------
 /backend/api-server/               @GuangFuHero/backend
