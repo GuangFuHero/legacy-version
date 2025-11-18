@@ -1,0 +1,90 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+      - .env:/app/src/.env:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - db-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: guanfu-backend
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      ENVIRONMENT: ${ENVIRONMENT}
+      APP_TITLE: ${APP_TITLE}
+      ALLOW_MODIFY_API_KEY_LIST: ${ALLOW_MODIFY_API_KEY_LIST}
+    volumes:
+      - .env:/app/src/.env:ro
+    ports:
+      - "8000:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - guanfu-network
+      - db-network
+
+  db-backup:
+    build:
+      context: .
+      dockerfile: Dockerfile.dbbackup
+    container_name: postgres-backup
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    env_file:
+      - ./.env
+    volumes:
+      - ./scripts/backup.sh:/backup.sh:ro
+      - ./backups:/backups
+    entrypoint: >
+      bash -c "printenv > /etc/environment &&
+               echo '0 */2 * * * . /etc/environment; /backup.sh >> /var/log/cron.log 2>&1' | crontab - &&
+               cron -f"
+    networks:
+      - db-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    depends_on:
+      - backend
+    networks:
+      - guanfu-network
+
+networks:
+  guanfu-network:
+    driver: bridge
+  db-network:
+    driver: bridge
