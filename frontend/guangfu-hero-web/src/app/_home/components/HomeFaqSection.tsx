@@ -88,7 +88,7 @@ export default function HomeFaqSection() {
 
         const rows = parseCsv(csvText);
         const list: FaqItem[] = [];
-        console.log(rows);
+        // console.log(rows);
         for (let i = 1; i < rows.length; i++) {
           const r = rows[i];
           const q = (r[0] || '').trim();

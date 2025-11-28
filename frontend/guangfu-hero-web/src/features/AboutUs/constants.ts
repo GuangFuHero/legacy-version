@@ -52,6 +52,9 @@ const teamMembers = [
       '布魯明',
       'Peli',
       '蔡宇婕',
+      'Teresa Siao',
+      'Azusaoto',
+      'Nicole',
     ],
   },
   {
@@ -175,7 +178,7 @@ const teamMembers = [
 
 const onSiteVolunteers = [
   '瀞瀞',
-  '站前蜂窩創始-彥',
+  '彥',
   'Fannie',
   '郡翔室內裝修有限公司',
   'Ting',
@@ -188,12 +191,13 @@ const onSiteVolunteers = [
   'Uu-資訊傳遞',
   'Roco',
   'Ben',
-  '志偉',
+  '仲夏',
   '徐喇喇',
   'LCD - Lala',
   '富昌廣告',
   '呂浩丞',
   '劉凱文',
+  'fish',
 ];
 
-export { teamMembers, onSiteVolunteers };
+export { onSiteVolunteers, teamMembers };
