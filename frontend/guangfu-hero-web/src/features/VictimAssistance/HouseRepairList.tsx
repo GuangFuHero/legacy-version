@@ -103,11 +103,11 @@ export default function HouseRepairList() {
               });
             } else {
               // found
-              console.log('重複的聯絡人：');
-              console.log(`${first} - ${second}`);
-              console.log(
-                `前一筆的電話: ${houseRepairData[indexFound].phone} || 新一筆的電話: ${third}`
-              );
+              // console.log('重複的聯絡人：');
+              // console.log(`${first} - ${second}`);
+              // console.log(
+              //   `前一筆的電話: ${houseRepairData[indexFound].phone} || 新一筆的電話: ${third}`
+              // );
             }
           }
         });

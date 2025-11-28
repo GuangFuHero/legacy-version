@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { Metadata } from 'next';
 import PageLayout from '@/components/PageLayout';
 import SiteMap from '@/features/SiteMap';
+import RedirectCountdown from './components/RedirectCountdown';
 
 const SITE_URL = 'https://gf250923.org';
 const LOGO_URL = 'https://gf250923.org/logo_new.svg';
@@ -323,14 +324,15 @@ export default function MapPage() {
   return (
     <PageLayout>
       {/* JSON-LD Script */}
-      <script
+      {/* <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
       <Suspense fallback={<div className="text-center py-8 text-[var(--gray)]">載入中...</div>}>
         <SiteMap />
-      </Suspense>
+      </Suspense> */}
+      <RedirectCountdown />
     </PageLayout>
   );
 }

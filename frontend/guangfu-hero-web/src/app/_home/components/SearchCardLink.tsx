@@ -10,6 +10,7 @@ export default function SearchCardLink({
   className,
   style,
   target,
+  onClick,
 }: {
   href: string;
   gaLabel: string;
@@ -17,17 +18,17 @@ export default function SearchCardLink({
   className?: string;
   style?: React.CSSProperties;
   target?: string;
+  onClick?: () => void;
 }) {
+  const handleClick = () => {
+    ReactGA.event(gaLabel);
+    if (onClick) {
+      onClick();
+    }
+  };
+
   return (
-    <Link
-      href={href}
-      onClick={() => {
-        ReactGA.event(gaLabel);
-      }}
-      className={className}
-      style={style}
-      target={target}
-    >
+    <Link href={href} onClick={handleClick} className={className} style={style} target={target}>
       {children}
     </Link>
   );
