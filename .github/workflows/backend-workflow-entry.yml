@@ -19,5 +19,5 @@ permissions:
 
 jobs:
   call-backend:
-    uses: ./backend/api-server/.github/workflows/cicd.yaml
+    uses: ./backend/api-server/.github/workflows/cicd.yaml@main
     secrets: inherit
