@@ -58,7 +58,8 @@ export default function VolunteerRegisterPage() {
           width: 1028,
           height: 301,
         },
-        description: '花蓮光復地震災區救援志工媒合平台，提供志工招募、物資分配、災民協助等服務',
+        description:
+          '花蓮馬太鞍溪災後重建資訊平台 - 光復超人（鏟子超人、光復英雄）提供居民重建的必要資訊，居家修繕、補助貸款、維修站、洗澡點、醫療站、志工住宿等完整災區重建資訊。',
         foundingDate: '2025-09-25',
         areaServed: {
           '@type': 'Place',
@@ -76,38 +77,6 @@ export default function VolunteerRegisterPage() {
           'https://www.youtube.com/channel/UC1jIUA-kbGq-Dh1s3QBC6ow',
         ],
         knowsAbout: ['災區救援', '志工媒合', '物資分配', '災民協助', '地震救災'],
-      },
-      // WebPage - 志工媒合頁面
-      {
-        '@type': 'WebPage',
-        '@id': `${SITE_URL}/volunteer-register#webpage`,
-        url: `${SITE_URL}/volunteer-register`,
-        name: '志工媒合',
-        description: '成為救災超人、瀏覽任務媒合與報到資訊，與在地需求即時配對，安全有序投入協助',
-        inLanguage: 'zh-TW',
-        isPartOf: {
-          '@type': 'WebSite',
-          '@id': `${SITE_URL}/#website`,
-          url: SITE_URL,
-          name: '光復超人',
-          publisher: {
-            '@id': `${SITE_URL}/#organization`,
-          },
-        },
-        about: {
-          '@type': 'Thing',
-          name: '災區志工招募',
-          description: '花蓮光復地震災區志工媒合與任務配對服務',
-        },
-        primaryImageOfPage: {
-          '@type': 'ImageObject',
-          url: LOGO_URL,
-        },
-        datePublished: '2025-09-23',
-        dateModified: new Date().toISOString().split('T')[0],
-        author: {
-          '@id': `${SITE_URL}/#organization`,
-        },
       },
       // BreadcrumbList
       {
@@ -134,7 +103,8 @@ export default function VolunteerRegisterPage() {
         '@id': `${SITE_URL}/#website`,
         url: SITE_URL,
         name: '光復超人',
-        description: '花蓮光復地震災區救援平台 - 志工媒合、物資分配、居民協助',
+        description:
+          '花蓮馬太鞍溪災後重建資訊平台 - 光復超人（鏟子超人、光復英雄）提供居民重建的必要資訊，居家修繕、補助貸款、維修站、洗澡點、醫療站、志工住宿等完整災區重建資訊。',
         publisher: {
           '@id': `${SITE_URL}/#organization`,
         },

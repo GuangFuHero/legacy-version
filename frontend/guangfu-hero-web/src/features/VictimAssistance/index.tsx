@@ -72,6 +72,7 @@ export default function VictimAssistance({ initialCategory = '補助貸款' }: V
       <PlaceList
         activeTab={CATEGORY_TO_PLACE_TYPE[selectedCategory]}
         onFilterPlaces={handleFilterPlaces}
+        category={selectedCategory}
       />
     );
   } else if (selectedCategory === '居家修繕') {
@@ -148,7 +149,7 @@ export default function VictimAssistance({ initialCategory = '補助貸款' }: V
               gaLabel={title}
               onClick={() => setIsBottomSheetOpen(false)}
             >
-              <h3>{title}</h3>
+              <h3 className="sticky top-0">{title}</h3>
               <small>{subtitle}</small>
               <Icon />
             </SearchCardLink>

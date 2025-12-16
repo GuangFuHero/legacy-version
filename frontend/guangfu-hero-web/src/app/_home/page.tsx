@@ -27,17 +27,17 @@ export const generateMetadata = (): Metadata => {
   return {
     title: '每一個人都是彼此的超人',
     description:
-      '花蓮光復地震災區即時救援地圖 - 光復超人（鏟子超人、光復英雄）提供志工路線、志工報名、物資分配、補水站、洗澡點、醫療站、臨時住宿等完整救災資訊。災民需求即時配對，熱食供應，光復小蜜蜂接駁服務。',
+      '花蓮馬太鞍溪災後重建資訊平台 - 光復超人（鏟子超人、光復英雄）提供居民重建的必要資訊，居家修繕、補助貸款、維修站、洗澡點、醫療站、志工住宿等完整災區重建資訊。',
     keywords:
-      '光復超人,鏟子超人,光復英雄,鏟子英雄,光復救災,光復志工,志工路線,志工報名,報名志工,救災地圖,光復地圖,花蓮光復,災區救援,物資分配,花蓮地震,災民需求,臨時住宿,熱食供應,光復小蜜蜂,花蓮小蜜蜂',
+      '光復超人,鏟子超人,災區重建,心理資源,居家修繕,補助資訊,馬太鞍溪補助,光復英雄,鏟子英雄,光復救災,光復志工,志工路線,花蓮光復,災區救援,物資分配,花蓮地震,災民需求,熱食供應,光復小蜜蜂,花蓮小蜜蜂',
     robots: {
       index: true,
       follow: true,
     },
     openGraph: {
-      title: '光復超人 | 花蓮光復地震災區救援地圖',
+      title: '光復超人 | 花蓮馬太鞍溪災後重建資訊平台',
       description:
-        '即時災情地圖、志工媒合、物資分配、災民協助 - 光復超人（鏟子超人）讓每一個人都是彼此的超人',
+        '光復超人平台轉型為馬太鞍溪流域災後重建資訊整合站，提供居民最新補助申請流程、修繕與貸款資源、心理支持與生活協助。串聯民間與官方力量，陪伴花蓮災區居民一同復原。',
       url: SITE_URL,
       type: 'website',
       images: [
@@ -45,7 +45,7 @@ export const generateMetadata = (): Metadata => {
           url: LOGO_URL,
           width: 1028,
           height: 301,
-          alt: '光復超人 Logo - 花蓮光復地震災區救援平台',
+          alt: '光復超人 Logo - 花蓮馬太鞍溪災後重建資訊平台',
         },
       ],
       siteName: '光復超人',
@@ -53,9 +53,9 @@ export const generateMetadata = (): Metadata => {
     },
     twitter: {
       card: 'summary_large_image',
-      title: '光復超人 | 花蓮光復地震災區救援地圖',
+      title: '光復超人 | 花蓮馬太鞍溪災後重建資訊平台',
       description:
-        '即時災情地圖、志工媒合、物資分配、災民協助 - 光復超人（鏟子超人）讓每一個人都是彼此的超人',
+        '光復超人平台轉型為馬太鞍溪流域災後重建資訊整合站，提供居民最新補助申請流程、修繕與貸款資源、心理支持與生活協助。串聯民間與官方力量，陪伴花蓮災區居民一同復原。',
       images: [LOGO_URL],
     },
     alternates: {
@@ -95,7 +95,7 @@ export default function HomePage() {
         },
         slogan: '每一個人都是彼此的超人',
         description:
-          '花蓮光復地震災區救援志工媒合平台，提供志工招募、物資分配、災民協助、即時災情地圖等服務',
+          '光復超人平台轉型為馬太鞍溪流域災後重建資訊整合站，提供居民最新補助申請流程、修繕與貸款資源、心理支持與生活協助。串聯民間與官方力量，陪伴花蓮災區居民一同復原。',
         address: {
           '@type': 'PostalAddress',
           addressLocality: '光復鄉',
@@ -110,7 +110,7 @@ export default function HomePage() {
         name: '光復超人',
         alternateName: '鏟子超人',
         description:
-          '花蓮光復地震災區救援平台 - 即時災情地圖、志工媒合、物資分配、災民協助、臨時住宿、熱食供應',
+          '花蓮馬太鞍溪災後重建資訊平台 - 光復超人（鏟子超人、光復英雄）提供居民重建的必要資訊，居家修繕、補助貸款、維修站、洗澡點、醫療站、志工住宿等完整災區重建資訊。',
         inLanguage: 'zh-TW',
         publisher: {
           '@id': `${SITE_URL}/#organization`,
@@ -121,7 +121,8 @@ export default function HomePage() {
         '@id': `${SITE_URL}/#webpage`,
         url: SITE_URL,
         name: '首頁',
-        description: '光復超人首頁：即時災情地圖、志工媒合、物資分配、災民協助等服務的入口',
+        description:
+          '光復超人首頁：居家修繕、補助貸款、維修站、洗澡點、醫療站、志工住宿等完整災區重建資訊的入口',
         inLanguage: 'zh-TW',
         isPartOf: {
           '@id': `${SITE_URL}/#website`,
