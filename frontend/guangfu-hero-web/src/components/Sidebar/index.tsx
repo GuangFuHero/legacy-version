@@ -44,6 +44,7 @@ const SIDEBAR_ITEM: (LinkItem | GroupItem)[] = [
   { name: '光復站點', href: '/victim/site' },
   // { name: '常見問題', href: '/faq' },
   { name: '關於我們', href: '/volunteer/about-us' },
+  { name: '友好單位', href: '/friendly_links' },
   // { name: '隱私權政策', href: '/privacy' },
   // { name: '服務條款', href: '/terms' },
   {
