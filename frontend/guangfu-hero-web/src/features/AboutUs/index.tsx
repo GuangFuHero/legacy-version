@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { getAssetPath } from '@/lib/utils';
 import ShareAction from '@/components/ShareAction';
+import '@/app/_home/home.css';
 
 const SectionHeader = ({ children }: { children: React.ReactNode }) => (
   <Typography variant="h4" fontWeight={600} textAlign="center" sx={{ my: 2 }}>
@@ -141,6 +142,25 @@ export default function AboutUs() {
             personNames={onSiteVolunteers}
             additionGroups={[]}
           />
+        </Stack>
+      </Stack>
+
+       <Stack>
+        <SectionHeader>支援單位</SectionHeader>
+        <Stack gap={2} sx={{ fontSize: 16 }} className="text-[var(--text-black)]">
+          <div className="bg-[var(--gray-4)] rounded-lg border-2 border-[var(--gray-4)] overflow-hidden">
+            <div className="bg-white px-3 py-5">
+              <Stack>
+                <Image
+                  src={getAssetPath('/ocf_logo.svg')}
+                  alt="OpenCultureFoundation_Logo"
+                  width={142}
+                  height={40}
+                  style={{ width: 'auto', height: '40px' }}
+                />
+              </Stack>
+            </div>
+          </div>
         </Stack>
       </Stack>
     </Stack>
