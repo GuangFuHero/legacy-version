@@ -100,7 +100,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           href="https://ocf.neticrm.tw/civicrm/contribute/transact?reset=1&id=88&utm_source=https%3A%2F%2Focf.neticrm.tw%2Fcivicrm%2Fcontribute%2Ftransact%3Freset%3D1%26id%3D76" // ← 換成你要去的路徑
           target="_blank"
           className="absolute w-full flex justify-center"
-          style={{bottom:'24px'}}
+          style={{bottom:'24px',right:'3px'}}
         >
           <Image
             src={getAssetPath('/menu_donate_button.png')}
