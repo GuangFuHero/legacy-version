@@ -5,6 +5,7 @@ import { Stack } from '@mui/material';
 import Link from 'next/link';
 import './home.css';
 import HomeFaqSection from './components/HomeFaqSection';
+import HomeFriendlyLinksSection from './components/HomeFriendlyLinksSection';
 import HomeAnnouncementsSection from './components/HomeAnnouncementsSection';
 import Image from 'next/image';
 import { getAssetPath } from '@/lib/utils';
@@ -253,6 +254,9 @@ export default function HomePage() {
 
         {/* 常見問題 */}
         <HomeFaqSection />
+
+        {/* 友好單位 */}
+        <HomeFriendlyLinksSection />
 
         {/* 網站公告 */}
         <HomeAnnouncementsSection />

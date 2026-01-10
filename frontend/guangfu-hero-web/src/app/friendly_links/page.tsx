@@ -92,9 +92,8 @@ export default function FriendlyLinksPage() {
         const parsedUnits: FriendlyUnit[] = rows
           .slice(1)
           .map((row, index) => {
-            const title = (row[2] || '').trim();
+            const title = (row[0] || '').trim();
             if (!title) return null; // Skip empty rows
-
             return {
               id: `unit-${index}`,
               title,
