@@ -4,6 +4,8 @@ import { useState } from 'react';
 import CloseButton from './CloseButton';
 import MenuItem from './MenuItem';
 import SubMenuItem from './SubMenuItem';
+import Image from 'next/image';
+import { getAssetPath } from '@/lib/utils';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -55,10 +57,6 @@ const SIDEBAR_ITEM: (LinkItem | GroupItem)[] = [
     name: '網站問題回報',
     href: 'https://docs.google.com/forms/d/e/1FAIpQLSd5HQsSMoStkgiaC-q3bHRaLVVGNKdETWIgZVoYEsyzE486ew/viewform?usp=dialog',
   },
-  // {
-  //   name: '媒合內容修改',
-  //   href: 'https://docs.google.com/forms/d/17VyOi9B43ouZ3_s5MdS1fs80fVR-lNvsV7Q4eG-2o68/viewform',
-  // },
 ];
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
@@ -98,6 +96,21 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             return null;
           })}
         </nav>
+        <a
+          href="https://ocf.neticrm.tw/civicrm/contribute/transact?reset=1&id=88&utm_source=https%3A%2F%2Focf.neticrm.tw%2Fcivicrm%2Fcontribute%2Ftransact%3Freset%3D1%26id%3D76" // ← 換成你要去的路徑
+          target="_blank"
+          className="absolute w-full flex justify-center"
+          style={{bottom:'24px',right:'3px'}}
+        >
+          <Image
+            src={getAssetPath('/menu_donate_button.png')}
+            alt="sidebar link"
+            width={240}
+            height={36}
+            className="hover:opacity-80"
+          />
+
+        </a>
       </div>
     </>
   );
