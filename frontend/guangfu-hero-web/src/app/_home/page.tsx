@@ -109,7 +109,7 @@ export default function HomePage() {
         '@id': `${SITE_URL}/#website`,
         url: SITE_URL,
         name: '光復超人',
-        alternateName: '鏟子超人',
+        alternateName: ['鏟子超人', '光復英雄', '鏟子英雄', '光復超人', '光復志工'],
         description:
           '花蓮馬太鞍溪災後重建資訊平台 - 光復超人（鏟子超人、光復英雄）提供居民重建的必要資訊，居家修繕、補助貸款、維修站、洗澡點、醫療站、志工住宿等完整災區重建資訊。',
         inLanguage: 'zh-TW',
@@ -122,6 +122,7 @@ export default function HomePage() {
         '@id': `${SITE_URL}/#webpage`,
         url: SITE_URL,
         name: '首頁',
+        alternateName: ['鏟子超人', '光復英雄', '鏟子英雄', '光復超人', '光復志工'],
         description:
           '光復超人首頁：居家修繕、補助貸款、維修站、洗澡點、醫療站、志工住宿等完整災區重建資訊的入口',
         inLanguage: 'zh-TW',

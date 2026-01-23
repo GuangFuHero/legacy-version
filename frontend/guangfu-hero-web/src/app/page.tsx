@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import HomePage from '@/app/_home/page';
 
 const SITE_URL = 'https://gf250923.org';
-const LOGO_URL = 'https://gf250923.org/logo_new.svg';
+const LOGO_URL = 'https://gf250923.org/logo_new_png.png';
 
 export const metadata: Metadata = {
   title: '每一個人都是彼此的超人',
