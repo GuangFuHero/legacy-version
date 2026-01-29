@@ -256,7 +256,7 @@ export default function HomePage() {
         {/* 常見問題 */}
         <HomeFaqSection />
 
-        {/* 友好單位 */}
+        {/* 他們也一直在陪伴 */}
         <HomeFriendlyLinksSection />
 
         {/* 網站公告 */}

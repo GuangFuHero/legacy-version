@@ -21,7 +21,7 @@ interface FriendlyUnit {
 type LoadingPhase = 'before' | 'during' | 'fadeOut' | 'done';
 
 /**
- * 首頁「友好單位」區塊。
+ * 首頁「他們也一直在陪伴」區塊。
  * - 從 Google Sheet 以 CSV 方式抓取資料
  * - 支援 X 軸水平滑動 (含桌機滑鼠拖曳)
  */
@@ -172,7 +172,7 @@ export default function HomeFriendlyLinksSection() {
         <>
             <h3 className="homeTitle pb-3 pt-8">
                 <div className="flex items-center gap-2">
-                    <p>友好單位</p>
+                    <p>他們也一直在陪伴</p>
                 </div>
                 <Link href="/friendly_links" className="flex items-center gap-1">
                     <p>看更多</p>

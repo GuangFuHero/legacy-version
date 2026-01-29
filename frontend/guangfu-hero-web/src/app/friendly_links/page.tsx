@@ -124,7 +124,7 @@ export default function FriendlyLinksPage() {
       <div className="max-w-4xl mx-auto lg:px-8 py-8 w-full">
         {/* Header Section */}
         <div className="flex items-center justify-between px-6 pb-4 border-b border-gray-200 mb-4">
-          <h1 className="text-2xl font-bold text-gray-900">友好單位</h1>
+          <h1 className="text-2xl font-bold text-gray-900">他們也一直在陪伴</h1>
           <Link href="/" className="flex items-center gap-1">
             回首頁
           </Link>
